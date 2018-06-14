@@ -8,15 +8,15 @@ const GithubStrategy = require('passport-github').Strategy;
 const github = require('../passport/github');
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
+router.get('/', function (req, res, next) {
   res.send('respond with a resource');
 });
 
-router.get('/signup', function(req, res, next) {
+router.get('/signup', function (req, res, next) {
   res.render('signup');
 });
 
-router.post('/signup', function(req, res, next) {
+router.post('/signup', function (req, res, next) {
   const hashedPassword = auth.hashPassword(req.body.password);
   models.users
     .findOne({
@@ -52,11 +52,11 @@ router.post('/signup', function(req, res, next) {
     });
 });
 
-router.get('/login', function(req, res, next) {
+router.get('/login', function (req, res, next) {
   res.render('login');
 });
 
-router.post('/login', function(req, res, next) {
+router.post('/login', function (req, res, next) {
   const hashedPassword = auth.hashPassword(req.body.password);
   models.users
     .findOne({
@@ -85,19 +85,23 @@ router.post('/login', function(req, res, next) {
     });
 });
 
-router.get('/login/github', passport.authenticate('github'));
+router.get('/login/github', passport.authenticate('github', {
+  session: true,
+  failureRedirect: "/users/login"
+}));
 
 router.get(
   '/login/github/callback',
   passport.authenticate('github', {
-    failureRedirect: '/pirates'
+    failureRedirect: '/users/login'
   }),
-  function(req, res) {
-    res.redirect('/users');
+  function (req, res) {
+    res.redirect('/users/profile/' + req.user.UserId)
   }
 );
 
-router.get('/profile/:id', auth.verifyUser, function(req, res, next) {
+router.get('/profile/:id', req.isAuthenticated, function (req, res, next) {
+  console.log(req.userData)
   if (req.params.id !== String(req.user.UserId)) {
     res.send('This is not your profile');
   } else {

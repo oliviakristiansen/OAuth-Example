@@ -20,12 +20,8 @@ module.exports = {
             console.log('AUTH GET')
             // console.log(req)
             let token = req.cookies.jwt;
-            console.log(req.cookies)
-            console.log(token);
             const decoded = jwt.verify(token, "secret");
-            console.log("decoded", decoded);
             req.userData = decoded;
-            console.log(models)
             models.users.findOne({
                 where: {
                     UserId: decoded.UserId

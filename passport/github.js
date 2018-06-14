@@ -1,38 +1,44 @@
 var GithubStrategy = require("passport-github").Strategy;
 var models = require("../models");
-var ghConfig = require("../gh.js");
 const passport = require("passport");
 
 passport.use(
     "github",
     new GithubStrategy({
-            clientID: "718347dd54bed581aaa9",
-            clientSecret: "dab2411cc367ef8437ae3e51f10389afae00f495",
-            callbackURL: "http://localhost:3000/login/github/callback"
+            clientID: "05ce3837da0c65abca8f",
+            clientSecret: "73d68298bc94860b2ba0487751686ea0e130b0ec",
+            callbackURL: "http://localhost:3000/users/login/github/callback"
         },
 
         // github will send back the tokens and profile
         function (access_token, refresh_token, profile, done) {
             models.users.findOne({
-                    where: {
-                        authId: profile.id
-                    }
-                })
-                .then(user => {
-                    if (!user) {
-                        let newUser = models.users.create({
-                            authId: profile.id,
-                            name: profile.displayName,
-                            role: "user"
-                        });
-                        done(null, newUser);
-                    }
-                    done(null, user);
-                })
-                .catch(err => {
-                    console.log(err);
-                    return done(err, null);
-                });
+                where: {
+                    AuthId: profile.id
+                }
+            }).then(user => {
+                // console.log(user)
+                // need to do the following three lines because github has only one field for name, not two for FirstName and LastName so we need to split on the space in the name. If the last name is something like 'de souza' then the spread will join the LastName into one string. 
+                let name = profile.displayName;
+                let [firstName, ...lastName] = name.split(" ");
+                lastName = lastName.join(" ");
+                if (!user) {
+                    let newUser = models.users.create({
+                        AuthId: profile.id,
+                        FirstName: firstName,
+                        LastName: lastName
+                    });
+                }
+                return done(null, user);
+
+            }).catch(err => {
+                if (err) {
+                    console.log('error');
+                    return done(err);
+                }
+
+            })
+
         }
     )
 );
