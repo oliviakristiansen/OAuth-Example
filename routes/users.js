@@ -96,11 +96,16 @@ router.get(
     failureRedirect: '/users/login'
   }),
   function (req, res) {
+    const token = auth.signUser(req.user);
+    res.cookie('jwt', token);
     res.redirect('/users/profile/' + req.user.UserId)
   }
 );
 
-router.get('/profile/:id', req.isAuthenticated, function (req, res, next) {
+router.get('/profile/:id', auth.verifyUser, function (req, res, next) {
+  if (!req.isAuthenticated()) {
+    return res.send('You are not authenticated');
+  }
   console.log(req.userData)
   if (req.params.id !== String(req.user.UserId)) {
     res.send('This is not your profile');

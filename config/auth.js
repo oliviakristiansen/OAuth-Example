@@ -17,10 +17,8 @@ module.exports = {
 
     verifyUser: function (req, res, next) {
         try {
-            console.log('AUTH GET')
-            // console.log(req)
-            let token = req.cookies.jwt;
-            const decoded = jwt.verify(token, "secret");
+            const decoded = jwt.verify(req.cookies.jwt, "secret");
+            console.log(decoded);
             req.userData = decoded;
             models.users.findOne({
                 where: {
@@ -32,7 +30,6 @@ module.exports = {
                 next();
             })
         } catch (err) {
-            console.log(err)
             return res.status(401).json({
                 message: "Auth Failed"
             });

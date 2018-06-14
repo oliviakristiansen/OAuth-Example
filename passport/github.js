@@ -23,20 +23,22 @@ passport.use(
                 let [firstName, ...lastName] = name.split(" ");
                 lastName = lastName.join(" ");
                 if (!user) {
-                    let newUser = models.users.create({
+                    return models.users.create({
                         AuthId: profile.id,
                         FirstName: firstName,
                         LastName: lastName
+                    }).then(user => {
+                        done(null, user);
                     });
+                } else {
+                    done(null, user);
                 }
-                return done(null, user);
 
             }).catch(err => {
                 if (err) {
                     console.log('error');
                     return done(err);
                 }
-
             })
 
         }
